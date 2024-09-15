@@ -80,7 +80,7 @@ public class BullsCowsPersistenceUnitInfo implements PersistenceUnitInfo {
 	@Override
 	public List<String> getManagedClassNames() {
 		
-		return List.of("telran.net.games.Gamer");
+		return List.of("telran.net.games.Gamer", "telran.net.games.Game");
 	}
 
 	@Override
@@ -130,5 +130,4 @@ public class BullsCowsPersistenceUnitInfo implements PersistenceUnitInfo {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

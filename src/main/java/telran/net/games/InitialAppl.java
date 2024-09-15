@@ -1,10 +1,9 @@
 package telran.net.games;
 
 import java.util.HashMap;
-
 import org.hibernate.jpa.HibernatePersistenceProvider;
-
 import jakarta.persistence.*;
+
 public class InitialAppl {
 
 	public static void main(String[] args) {
@@ -17,7 +16,7 @@ public class InitialAppl {
 		EntityManager em = emFactory.createEntityManager();
 		Gamer gamer = em.find(Gamer.class, "gamer1");
 		System.out.println(gamer);
-
+		Game game = em.find(Game.class, "1001");
+		System.out.println(game);
 	}
-
 }
