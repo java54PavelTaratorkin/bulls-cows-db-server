@@ -20,10 +20,7 @@ public class Gamer {
 	public LocalDate getBirthdate() {
 		return birthdate;
 	}
-	@Override
-	public String toString() {
-		return "Gamer [username=" + username + ", birthdate=" + birthdate + "]";
-	}
+	
 	
 	
 	
