@@ -27,9 +27,33 @@ public class InitialAppl {
 //		List<Integer> list =
 //				repository.getBullsInMovesGamersBornAfter(LocalDate.ofYearDay(2000, 1));
 //		displayResult(list);
-		List<MinMaxAmount> list = 
-				repository.getDistributionGamesMoves(6);
-		displayResult(list);
+//		List<MinMaxAmount> list = 
+//				repository.getDistributionGamesMoves(6);
+//		displayResult(list);
+
+		//HW#55
+		System.out.println("1. display all data about games, average age of gamers in which \n"
+				+ "greater than 60 (consider constraction where id in (select with group by)");
+		List<Game> task1 = 
+		repository.getGamesWithGamersAvgAgeGreaterThan(60);
+		displayResult(task1);
+		
+		System.out.println("2. display game_id and number of moves made by winner of games with \n"
+				+ "number of moves made by winner less than 5");
+		List<GameMoves> task2 = 
+				repository.getGameWinnerMovesLessThen(5);
+		displayResult(task2);
+		
+		System.out.println("3. display gamer names who made in one game number of moves less than 4");
+		List<String> task3 = 
+				repository.getGamerMovesLessThen(5);
+		displayResult(task3);
+		
+		System.out.println("4. display game_id and average number of moves made by each gamer. \n"
+				+ "Example in game 100000 there are three gamers (gamer1, gamer2, gamer3)");
+		List<GameAvgMoves> task4 = 
+				repository.getGameGamerAvgMoves();
+		displayResult(task4);
 
 	}
 
