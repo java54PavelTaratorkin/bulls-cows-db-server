@@ -1,5 +1,7 @@
 package telran.net.games;
 
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
@@ -68,6 +70,7 @@ public class BullsCowsPersistenceUnitInfo implements PersistenceUnitInfo {
 	@Override
 	public List<URL> getJarFileUrls() {
 		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -80,7 +83,10 @@ public class BullsCowsPersistenceUnitInfo implements PersistenceUnitInfo {
 	@Override
 	public List<String> getManagedClassNames() {
 		
-		return List.of("telran.net.games.Gamer", "telran.net.games.Game");
+		return List.of("telran.net.games.Gamer",
+				"telran.net.games.Game",
+				"telran.net.games.GameGamer",
+				"telran.net.games.Move");
 	}
 
 	@Override
@@ -130,4 +136,5 @@ public class BullsCowsPersistenceUnitInfo implements PersistenceUnitInfo {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }
