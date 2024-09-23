@@ -7,9 +7,7 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 
 import jakarta.persistence.*;
 import jakarta.persistence.spi.*;
-import telran.net.games.exceptions.GameNotFoundException;
-import telran.net.games.exceptions.GamerAlreadyExistsdException;
-import telran.net.games.exceptions.GamerNotFoundException;
+import telran.net.games.exceptions.*;
 
 public class BullsCowsRepositoryJpa implements BullsCowsRepository {
 	private EntityManager em;
@@ -77,29 +75,32 @@ public class BullsCowsRepositoryJpa implements BullsCowsRepository {
 		transaction.commit();
 
 	}
-
+	
+	
+	//HW#56
 	@Override
 	public boolean isGameFinished(long id) {
-		// TODO Auto-generated method stub
-		return false;
+	    Game game = getGame(id);
+	    return game.isfinished();
 	}
 
+	//HW#56
 	@Override
 	public void setIsFinished(long gameId) {
-		// TODO Auto-generated method stub
+	    EntityTransaction transaction = em.getTransaction();
+	    transaction.begin();
+	    Game game = getGame(gameId);
+	    game.setfinished(true);
+	    transaction.commit();
 
 	}
 
-	@Override
-	public void setGameGamerWinner(long gameId, String userName) {
-		// TODO Auto-generated method stub
-
-	}
-
+	//HW#56
 	@Override
 	public List<Long> getGameIdsNotStarted() {
-		// TODO Auto-generated method stub
-		return null;
+	    TypedQuery<Long> query = em.createQuery(
+	        "select game.id from Game game where game.dateTime is null", Long.class);
+	    return query.getResultList();
 	}
 
 	@Override
@@ -109,7 +110,7 @@ public class BullsCowsRepositoryJpa implements BullsCowsRepository {
 				String.class);
 		return query.setParameter(1, id).getResultList();
 	}
-
+	
 	@Override
 	public void createGameGamer(long gameId, String username) {
 		Game game = getGame(gameId);
@@ -119,28 +120,60 @@ public class BullsCowsRepositoryJpa implements BullsCowsRepository {
 
 	}
 
+	//HW#56
 	@Override
 	public void createGameGamerMove(MoveDto moveDto) {
-		// TODO Auto-generated method stub
-
+	    Game game = getGame(moveDto.gameId());
+	    Gamer gamer = getGamer(moveDto.username());
+	    GameGamer gameGamer = getGameGamer(game.getId(), gamer.getUsername());
+	    Move move = new Move(moveDto.sequence(), moveDto.bulls(), moveDto.cows(), gameGamer);
+	    createObject(move);
 	}
 
+	//HW#56
 	@Override
 	public List<MoveData> getAllGameGamerMoves(long gameId, String username) {
-		// TODO Auto-generated method stub
-		return null;
+	    GameGamer gameGamer = getGameGamer(gameId, username);
+	    TypedQuery<MoveData> query = em.createQuery(
+	        "select sequence, bulls, cows from Move " +
+	        "where gameGamer.game.id = :gameGamerId", MoveData.class);
+	    return query.setParameter("gameGamerId", gameGamer.getId()).getResultList();
 	}
 
+	//HW#56
 	@Override
 	public void setWinner(long gameId, String username) {
-		// TODO Auto-generated method stub
-
+	    Game game = getGame(gameId);
+	    Gamer gamer = getGamer(username);
+	    GameGamer gameGamer = getGameGamer(game.getId(), gamer.getUsername());
+	    if (gameGamer == null) {
+	    	throw new GameGamerNotFoundException(game.getId(), gamer.getUsername());
+	    }
+	    EntityTransaction transaction = em.getTransaction();
+	    transaction.begin();
+	    gameGamer.setWinner(true);
+	    transaction.commit();
 	}
 
+	//HW#56
 	@Override
 	public boolean isWinner(long gameId, String username) {
-		// TODO Auto-generated method stub
-		return false;
+	    Game game = getGame(gameId);
+	    Gamer gamer = getGamer(username);
+	    GameGamer gameGamer = getGameGamer(game.getId(), gamer.getUsername());
+	    if (gameGamer == null) {
+	    	throw new GameGamerNotFoundException(game.getId(), gamer.getUsername());
+	    }
+	    return gameGamer.isWinner();
 	}
 
+	private GameGamer getGameGamer(long gameId, String username) {
+	    return em.createQuery(
+	        "select gameGamer from GameGamer gameGamer " +
+	        "where game.id = :gameId and gamer.username = :username", 
+	        GameGamer.class)
+	        .setParameter("gameId", gameId)
+	        .setParameter("username", username)
+	        .getSingleResult();
+	}
 }

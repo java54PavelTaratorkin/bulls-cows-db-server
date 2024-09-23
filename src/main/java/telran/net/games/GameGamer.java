@@ -29,6 +29,11 @@ public class GameGamer {
 	public GameGamer() {
 		
 	}
+	
+	public void setWinner(boolean isWinner) {
+	    this.isWinner = isWinner;
+	}
+	
 	public GameGamer(boolean isWinner, Game game, Gamer gamer) {
 		this.isWinner = isWinner;
 		this.game = game;
