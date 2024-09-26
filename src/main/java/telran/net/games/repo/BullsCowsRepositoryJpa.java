@@ -7,17 +7,9 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 
 import jakarta.persistence.*;
 import jakarta.persistence.spi.*;
-import telran.net.games.entities.Game;
-import telran.net.games.entities.GameGamer;
-import telran.net.games.entities.Gamer;
-import telran.net.games.entities.Move;
-import telran.net.games.exceptions.GameGamerAlreadyExistsException;
-import telran.net.games.exceptions.GameGamerNotFoundException;
-import telran.net.games.exceptions.GameNotFoundException;
-import telran.net.games.exceptions.GamerAlreadyExistsdException;
-import telran.net.games.exceptions.GamerNotFoundException;
-import telran.net.games.model.MoveData;
-import telran.net.games.model.MoveDto;
+import telran.net.games.entities.*;
+import telran.net.games.exceptions.*;
+import telran.net.games.model.*;
 
 public class BullsCowsRepositoryJpa implements BullsCowsRepository {
 	private EntityManager em;
@@ -140,7 +132,7 @@ public class BullsCowsRepositoryJpa implements BullsCowsRepository {
 	public void createGameGamerMove(MoveDto moveDto) {
 		long gameId = moveDto.gameId();
 		String username = moveDto.username();
-		GameGamer gameGamer = getGameGamer(gameId, username );
+		GameGamer gameGamer = getGameGamer(gameId, username);
 		Move move = new Move(moveDto.sequence(), moveDto.bulls(), moveDto.cows(), gameGamer);
 		createObject(move);
 

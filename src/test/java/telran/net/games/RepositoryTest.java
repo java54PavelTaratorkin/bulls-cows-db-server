@@ -2,22 +2,15 @@ package telran.net.games;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.*;
 
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 
-import telran.net.games.entities.Game;
-import telran.net.games.entities.Gamer;
+import telran.net.games.entities.*;
 import telran.net.games.exceptions.*;
-import telran.net.games.model.MoveData;
-import telran.net.games.model.MoveDto;
-import telran.net.games.repo.BullsCowsRepository;
-import telran.net.games.repo.BullsCowsRepositoryJpa;
+import telran.net.games.model.*;
+import telran.net.games.repo.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RepositoryTest {
