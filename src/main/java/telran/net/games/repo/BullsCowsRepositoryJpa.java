@@ -7,17 +7,9 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 
 import jakarta.persistence.*;
 import jakarta.persistence.spi.*;
-import telran.net.games.entities.Game;
-import telran.net.games.entities.GameGamer;
-import telran.net.games.entities.Gamer;
-import telran.net.games.entities.Move;
-import telran.net.games.exceptions.GameGamerAlreadyExistsException;
-import telran.net.games.exceptions.GameGamerNotFoundException;
-import telran.net.games.exceptions.GameNotFoundException;
-import telran.net.games.exceptions.GamerAlreadyExistsdException;
-import telran.net.games.exceptions.GamerNotFoundException;
-import telran.net.games.model.MoveData;
-import telran.net.games.model.MoveDto;
+import telran.net.games.entities.*;
+import telran.net.games.exceptions.*;
+import telran.net.games.model.*;
 
 public class BullsCowsRepositoryJpa implements BullsCowsRepository {
 	private EntityManager em;
@@ -160,7 +152,8 @@ public class BullsCowsRepositoryJpa implements BullsCowsRepository {
 	@Override
 	public List<MoveData> getAllGameGamerMoves(long gameId, String username) {
 		GameGamer gameGamer = getGameGamer(gameId, username);
-		TypedQuery<MoveData> query = em.createQuery("select sequence, bulls, cows from Move where gameGamer.id = ?1",
+		TypedQuery<MoveData> query = 
+				em.createQuery("select sequence, bulls, cows from Move where gameGamer.id = ?1",
 				MoveData.class);
 		return query.setParameter(1, gameGamer.getId()).getResultList();
 	}
@@ -181,4 +174,36 @@ public class BullsCowsRepositoryJpa implements BullsCowsRepository {
 		return gameGamer.isWinner();
 	}
 
+	//New methods
+	@Override
+	public List<Long> getNotStartedGamesWithGamer(String username) {
+	    TypedQuery<Long> query = em.createQuery(
+	        "select game.id from GameGamer where gamer.username = :username and game.dateTime is null",
+	        Long.class);
+	    return query.setParameter("username", username).getResultList();
+	}
+	
+	@Override
+	public List<Long> getStartedGamesWithGamer(String username) {
+	    TypedQuery<Long> query = em.createQuery(
+	        "select game.id from GameGamer where gamer.username = :username and game.dateTime is not null and game.isFinished = false", 
+	        Long.class);
+	    return query.setParameter("username", username).getResultList();
+	}
+
+	@Override
+	public List<Long> getNotStartedGamesWithNoGamer(String username) {
+	    TypedQuery<Long> query = em.createQuery(
+	        "select id from Game where dateTime is null and id not in " +
+	        "(select game.id from GameGamer where gamer.username = :username)", 
+	        Long.class);
+	    return query.setParameter("username", username).getResultList();
+	}
+
+    @Override
+    public List<String> getAllGamers() {
+        TypedQuery<String> query = em.createQuery("select username from Gamer", String.class);
+        return query.getResultList();
+    }
+	
 }

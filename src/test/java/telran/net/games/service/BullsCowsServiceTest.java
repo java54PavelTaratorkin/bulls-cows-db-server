@@ -32,7 +32,7 @@ class BullsCowsServiceTest {
 		hibernateProperties.put("hibernate.hbm2ddl.auto", "create");
 		repository = new BullsCowsRepositoryJpa
 				(new BullsCowsTestPersistenceUnitInfo(), hibernateProperties);
-		bcRunner = new BullsCowsGameRunner(N_DIGITS);
+		bcRunner = new BullsCowsGameRunner();
 		bcService = new BullsCowsServiceImpl(repository, bcRunner);
 		
 	}
@@ -40,12 +40,12 @@ class BullsCowsServiceTest {
 	@Order(1)
 	@Test
 	void createGameTest() {
-		gameIdNormalFlow = bcService.createGame();
+		gameIdNormalFlow = bcService.createGame(N_DIGITS);
 		Game game = repository.getGame(gameIdNormalFlow);
 		assertNull(game.getDate());
 		assertFalse(game.isfinished());
 		toBeGuessedSequence = ((BullsCowsServiceImpl)bcService).getSequence(gameIdNormalFlow);
-		assertTrue(bcRunner.checkGuess(toBeGuessedSequence));
+		assertTrue(bcRunner.checkGuess(toBeGuessedSequence, N_DIGITS));
 		
 	}
 	@Order(2)
@@ -131,7 +131,7 @@ class BullsCowsServiceTest {
 	@Order(9)
 	@Test
 	void noGamerExceptionTest() {
-		gameIdAltFlow = bcService.createGame();
+		gameIdAltFlow = bcService.createGame(N_DIGITS);
 		toBeGuessedSequence = ((BullsCowsServiceImpl)bcService).getSequence(gameIdAltFlow);
 		assertThrowsExactly(NoGamerInGameException.class,
 				() -> bcService.startGame(gameIdAltFlow));

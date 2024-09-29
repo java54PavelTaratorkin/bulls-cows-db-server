@@ -11,12 +11,12 @@ import telran.net.games.service.*;
 
 public class BullsCowsServerAppl {
 
-	private static final int PORT = 5000;
-	private static final int N_DIGITS = 0;
+	private static final int PORT = 4000;
 
 	public static void main(String[] args) {
+		int port = args.length > 0 ? Integer.parseInt(args[0]) : PORT;
 		Protocol bullsCowsProtocol = getBullsCowsProtocol();
-		TcpServer server = new TcpServer(bullsCowsProtocol , PORT);
+		TcpServer server = new TcpServer(bullsCowsProtocol , port);
 		server.run();
 
 	}
@@ -26,7 +26,7 @@ public class BullsCowsServerAppl {
 		hibernateProperties.put("hibernate.hbm2ddl.auto", "update");
 		BullsCowsRepository repository = new BullsCowsRepositoryJpa
 				(new BullsCowsPersistenceUnitInfo(), hibernateProperties);
-		BullsCowsGameRunner bcRunner = new BullsCowsGameRunner(N_DIGITS);
+		BullsCowsGameRunner bcRunner = new BullsCowsGameRunner();
 		BullsCowsService bcService = new BullsCowsServiceImpl(repository, bcRunner);
 		return new BullsCowsProtocol(bcService);
 	}

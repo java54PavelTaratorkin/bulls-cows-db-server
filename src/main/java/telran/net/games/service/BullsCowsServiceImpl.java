@@ -6,6 +6,7 @@ import java.util.List;
 
 import telran.net.games.entities.*;
 import telran.net.games.exceptions.*;
+import telran.net.games.model.GameDefaultData;
 import telran.net.games.model.MoveData;
 import telran.net.games.model.MoveDto;
 import telran.net.games.repo.BullsCowsRepository;
@@ -24,9 +25,9 @@ public class BullsCowsServiceImpl implements BullsCowsService {
 	 * Creates new game
 	 * returns ID of the created game
 	 */
-	public long createGame() {
+	public long createGame(int sequenceLength) {
 		
-		return bcRepository.createNewGame(bcRunner.getRandomSequence());
+		return bcRepository.createNewGame(bcRunner.getRandomSequence(sequenceLength));
 	}
 	@Override
 	/**
@@ -79,8 +80,11 @@ public class BullsCowsServiceImpl implements BullsCowsService {
 	 * no exceptions (empty list is allowed)
 	 */
 	public List<Long> getNotStartedGames() {
-		
-		return bcRepository.getGameIdsNotStarted();
+		List<Long> result = bcRepository.getGameIdsNotStarted();
+		if (result.isEmpty()) {
+			throw new NoNotStartedGamesException();
+		}
+		return result;
 	}
 	@Override
 	/**
@@ -97,9 +101,9 @@ public class BullsCowsServiceImpl implements BullsCowsService {
 	 * GameGamerNotFounException
 	 */
 	public List<MoveData> moveProcessing(String moveSequence, long gameId, String username) {
-		
-		if(!bcRunner.checkGuess(moveSequence)) {
-			throw new IncorrectMoveSequenceException(moveSequence, bcRunner.nDigits);
+		int sequenceLength = getGameSequenceLength(gameId);
+		if(!bcRunner.checkGuess(moveSequence, sequenceLength)) {
+			throw new IncorrectMoveSequenceException(moveSequence, sequenceLength);
 		}
 		bcRepository.getGamer(username);//only for checking whether the gamer exists
 		if (!bcRepository.isGameStarted(gameId)) {
@@ -111,11 +115,11 @@ public class BullsCowsServiceImpl implements BullsCowsService {
 		
 		String toBeGuessedSequence = getSequence(gameId);
 		MoveData moveData = bcRunner.moveProcessing(moveSequence,
-				toBeGuessedSequence);
+				toBeGuessedSequence, sequenceLength);
 		MoveDto moveDto = new MoveDto(gameId, username, moveSequence,
 				moveData.bulls(), moveData.cows());
 		bcRepository.createGameGamerMove(moveDto);
-		if(bcRunner.checkGameFinished(moveData)) {
+		if(bcRunner.checkGameFinished(moveData, sequenceLength)) {
 			finishGame(gameId, username);
 		}
 		return bcRepository.getAllGameGamerMoves(gameId, username);
@@ -155,6 +159,120 @@ public class BullsCowsServiceImpl implements BullsCowsService {
 	String getSequence(long gameId) {
 		Game game = bcRepository.getGame(gameId);
 		return game.getSequence();
+	}
+	
+    public BullsCowsServiceImpl(BullsCowsRepository bcRepository) {
+        this.bcRepository = bcRepository;
+    }
+    /**
+     * Returns a list of game IDs for not-started games where the specified gamer has joined.
+     * Throws NoNotStartedGamesWithGamerException if no such games are found.
+     * 
+     * @param username the username of the gamer
+     * @return list of game IDs
+     * Exceptions:
+     * NoNotStartedGamesWithGamerException
+     */
+    @Override
+    public List<Long> getNotStartedGamesWithGamer(String username) {
+    	List<Long> result = bcRepository.getNotStartedGamesWithGamer(username);
+    	if (result.isEmpty()) {
+    		throw new NoNotStartedGamesWithGamerException(username);
+    	}
+        return result;
+    }
+
+    /**
+     * Returns a list of game IDs for not-started games where the specified gamer has not joined.
+     * Throws NoNotStartedGamesWithNoGamerException if no such games are found.
+     * 
+     * @param username the username of the gamer
+     * @return list of game IDs
+     * Exceptions:
+     * NoNotStartedGamesWithNoGamerException
+     */
+    @Override
+    public List<Long> getNotStartedGamesWithNoGamer(String username) {    	
+    	List<Long> result = bcRepository.getNotStartedGamesWithNoGamer(username);
+    	if (result.isEmpty()) {
+    		throw new NoNotStartedGamesWithNoGamerException(username);
+    	}
+    	return result;
+    }
+
+    /**
+     * Returns a list of game IDs for started games where the specified gamer has joined.
+     * Throws NoStartedGamesWithGamerException if no such games are found.
+     * 
+     * @param username the username of the gamer
+     * @return list of game IDs
+     * Exceptions:
+     * NoStartedGamesWithGamerException
+     */
+    @Override
+    public List<Long> getStartedGamesWithGamer(String username) {
+    	List<Long> result = bcRepository.getStartedGamesWithGamer(username);
+    	if (result.isEmpty()) {
+    		throw new NoStartedGamesWithGamerException(username);
+    	}
+    	return result;
+    }
+    
+    /**
+     * Logs in the specified gamer by username and returns the logged-in username.
+     * Throws GamerNotFoundException if the gamer does not exist.
+     * 
+     * @param username the username of the gamer
+     * @return the logged-in username
+     * Exceptions:
+     * GamerNotFoundException
+     */
+    @Override
+    public String loginGamer(String username) {
+        Gamer gamer = bcRepository.getGamer(username);
+        return gamer.getUsername();
+    }
+    
+    /**
+     * Returns a list of all registered gamers.
+     * Throws NoGamersExistsException if no gamers are registered.
+     * 
+     * @return list of gamer usernames
+     * Exceptions:
+     * NoGamersExistsException
+     */
+    @Override
+    public List<String> getAllGamers() {
+    	List<String> result = bcRepository.getAllGamers();
+        if (result.isEmpty()) {
+        	throw new NoGamersExistsException();
+        }
+        return result;
+    }
+
+    /**
+     * Returns the sequence length of the game with the given game ID.
+     * 
+     * @param gameId the ID of the game
+     * @return the sequence length
+     */
+    @Override
+    public int getGameSequenceLength(long gameId) {
+		Game game = bcRepository.getGame(gameId);
+		return game.getSequence().toString().length();
+	}
+
+    /**
+     * Retrieves the default game settings including the minimum and maximum sequence size, 
+     * default sequence size, and minimum age for gamers.
+     * 
+     * @return the default game data (min/max sequence size, default sequence size, and minimum age)
+     */
+    @Override
+    public GameDefaultData getGameDefaults() {
+		return new GameDefaultData(bcRunner.getMinSequenceLength(),
+				bcRunner.getMaxSequenceLength(), bcRunner.getDefSequenceLength(),
+				bcRunner.getMinAge());
 	}
 	
 }

@@ -1,8 +1,5 @@
 package telran.net.games.model;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.json.JSONObject;
 
 
