@@ -63,6 +63,8 @@ class BullsCowsServiceTest {
 		assertEquals(username, gamer.getUsername());
 		assertEquals(birthDate, gamer.getBirthdate());
 	}
+	
+	
 	@Order(4)
 	@Test
 	void joinGameTest() {
@@ -126,6 +128,23 @@ class BullsCowsServiceTest {
 		array[N_DIGITS - 1] = array[0];
 		array[0] = tmp;
 		return new String(array);
+	}
+	@Test
+	void getIdsTests() {
+		gameIdNormalFlow = bcService.createGame();
+		List<Long> ids = bcService.getNotStartedGamesWithOutGamer(username);
+		assertEquals(gameIdNormalFlow, ids.get(0));
+		bcService.registerGamer("gamer", birthDate);
+		bcService.gamerJoinGame(gameIdNormalFlow, "gamer");
+		ids = bcService.getNotStartedGamesWithOutGamer(username);
+		assertEquals(gameIdNormalFlow, ids.get(0));
+		ids = bcService.getNotStartedGamesWithGamer("gamer");
+		assertEquals(gameIdNormalFlow, ids.get(0));
+		bcService.startGame(gameIdNormalFlow);
+		ids = bcService.getStartedGamesWithGamer(username);
+		assertTrue(ids.isEmpty());
+		ids = bcService.getStartedGamesWithGamer("gamer");
+		assertEquals(gameIdNormalFlow, ids.get(0));
 	}
 	//Alternative states flow
 	@Order(9)
